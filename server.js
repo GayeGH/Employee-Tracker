@@ -36,6 +36,8 @@ function viewMenu() {
           "View all departments",
           "View all roles",
           "View all employees",
+          "Add department",
+          
     ]
       }
     ])
@@ -43,7 +45,7 @@ function viewMenu() {
     .then((response) => {
       const menuChoice = response.choice;
 
-      if (response.choice === "View all departments") {
+      if (menuChoice === "View all departments") {
         // query db for all departmenets
         db.query("SELECT * FROM departments", function (err, results) {
           console.table(results);
@@ -51,22 +53,73 @@ function viewMenu() {
         });
     }
        
-       else if (response.choice === "View all roles") {
+       else if (menuChoice === "View all roles") {
          // query db for all roles
          db.query("SELECT * FROM roles", function (err, results) {
              console.table(results);
           viewMenu()
           });
         } 
-       else if (response.choice === "View all employees") {
-         // query db for all employees
+       else if (menuChoice === "View all employees") {
+         // query db to view employees
          db.query("SELECT * FROM employees", function (err, results) {
              console.table(results);
            viewMenu()
            });
-        };
-    
+        }
 
+        else if (menuChoice === "Add department") {
+          // const departments = req.body;
+          // query db to add departments
+         db.query("INSERT INTO departments VALUES(?,?)", [0, departments.title], function (err, results) {
+          console.table(results);
+          viewMenu()
+         });
+      }
+      })};
+
+  //Next set of instructions
+      function addMenu() {
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              name: "choice",
+              message: "What would you like to do?",
+              choices: [
+                "Add department",
+                "Add role",
+                "Add employee",
+            ]
+            }
+          ])
+      
+          .then((response) => {
+            const menuChoice = response.choice;
+      
+            if (response.choice === "Add departments") {
+              // query db for all departmenets
+              db.query("INSERT INTO departments VALUES(?,?,?)", [ 0, departments.title]), function (err, results) {
+                console.table(results);
+              viewMenu()
+              };
+          }
+             
+             else if (response.choice === "Add roles") {
+               // query db for all roles
+               db.query("INSERT INTO roles VALUES(?,?,)", [0, roles.title], function (err, results) {
+                   console.table(results);
+                viewMenu()
+                });
+              } 
+             else if (response.choice === "Add employees") {
+               // query db for all employees
+               db.query("INSERT INTO employees VALUES(?, ?, ?)",[0, employees.first_name, employees.last_name], function (err, results) {
+                   console.table(results);
+                 viewMenu()
+                 });
+              };
+            })}
     
 
 // {
