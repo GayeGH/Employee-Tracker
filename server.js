@@ -3,7 +3,7 @@ const express = require("express");
 const mysql = require("mysql2");
 require("console.table");
 
-const port = 3000
+const port = 3000;
 
 //Connection information for sql database
 const db = mysql.createConnection(
@@ -21,10 +21,9 @@ db.connect(function (err) {
   console.log("SQL Connected");
 
   viewMenu();
-  
+
 });
-//db.query("SELECT * FROM employee", (err, results) => {
-// console.log (results);
+
 
 function viewMenu() {
   inquirer
@@ -34,202 +33,177 @@ function viewMenu() {
         name: "choice",
         message: "What would you like to do?",
         choices: [
-          "View all departments",
-          "View all roles",
-          "View all employees",
-          "Add department",
-          "Add role"
-          
-    ]
-      }
-])
-  
+          "View All Departments",
+          "View All Roles",
+          "View All Employees",
+          "Add Department",
+          "Add Role",
+          "Add Employee",
+          "Update Employee Role",
+        ],
+      },
+    ])
+
     .then((response) => {
       const menuChoice = response.choice;
 
-      if (menuChoice === "View all departments") {
+      if (menuChoice === "View All Departments") {
         // query db for all departmenets
         db.query("SELECT * FROM departments", function (err, results) {
           console.table(results);
-        viewMenu()
-      });
-      }
-       
-       else if (menuChoice === "View all roles") {
-         // query db for all roles
-         db.query("SELECT * FROM roles", function (err, results) {
-             console.table(results);
-          viewMenu()
-          });
-        } 
-       else if (menuChoice === "View all employees") {
-         // query db to view employees
-         db.query("SELECT * FROM employees", function (err, results) {
-             console.table(results);
-           viewMenu()
-           });
-        }
-
-        else if (menuChoice === "Add department") {
-          inquirer.prompt({
-            type:'input',
-            name: 'addDept',
-            message: "What department would you like to add"
-          }).then(answers => {
-            db.query("INSERT INTO departments VALUES(?,?)",[0, answers.addDept],function (err, results) {
-              console.table(results);
-              viewMenu()
-             });
-          })
-        }
+          viewMenu();
+        });
+      } else if (menuChoice === "View All Roles") {
+        // query db for all roles
+        db.query("SELECT * FROM roles", function (err, results) {
+          console.table(results);
+          viewMenu();
+        });
+      } else if (menuChoice === "View All Employees") {
+        // query db to view employees
         
-        else if (menuChoice === "Add role") {
-          inquirer.prompt({
-            type:'input',
-            name: 'addRole',
-            message: "What role would you like to add"
+        db.query(
+          "SELECT * FROM employees LEFT JOIN roles ON employees.role_id = roles.id",
+          function (err, results) {
+            console.table(results);
+            viewMenu();
           }
-          ).then(answers => {
-            //const answers = new Role(0, answers.addrole, answers.addSalary, answers.addId );
-            db.query("INSERT INTO roles VALUES(?,?,?,?)",[0, answers.addRole, answers.addSalary, answers.addId],function (err, results) {
-              console.table(results)
-              viewMenu()
-             });
+        );
+
+      } else if (menuChoice === "Add Department") {
+        inquirer
+          .prompt({
+            type: "input",
+            name: "addDept",
+            message: "What department would you like to add",
           })
-        }
+          .then((answers) => {
+            db.query(
+              "INSERT INTO departments VALUES(?,?)",
+              [0, answers.addDept],
+              function (err, results) {
+                console.table(results);
+                viewMenu();
+              }
+            );
+          });
 
-    })};
-      //     // query db to add departments
-      //    db.query("INSERT INTO departments VALUES(?,?)", [0, departments.title], function (err, results) {
-      //     console.table(results);
-      //     viewMenu()
-      //    });
-      // }
-      // })};
+      } else if (menuChoice === "Add Role") {
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              name: "addRole",
+              message: "What role would you like to add?",
+            },
+            {
+              type: "input",
+              name: "addSalary",
+              message: "Enter Salary",
+            },
+            {
+              type: "input",
+              name: "addDepartment_id",
+              message: "Enter Department ID",
+            },
+          ])
+          .then((answers) => {
+            db.query(
+              "INSERT INTO roles (title, salary, department_id)VALUES(?,?,?)",
+              [answers.addRole, answers.addSalary, answers.addDepartment_id],
+              function (err, results) {
+                console.table(results);
+                viewMenu();
+              }
+            );
+          });
 
-//   //Next set of instructions
-//       function addMenu() {
-//         inquirer
-//           .prompt([
-//             {
-//               type: "list",
-//               name: "choice",
-//               message: "What would you like to do?",
-//               choices: [
-//                 "Add department",
-//                 "Add role",
-//                 "Add employee",
-//             ]
-//             }
-//           ])
-      
-//           .then((response) => {
-//             const menuChoice = response.choice;
-      
-//             if (menuChoice === "Add departments") {
-//               // query db for all departmenets
-//               db.query("INSERT INTO departments VALUES(?,?,?)", [ 0, departments.title]), function (err, results) {
-//                 console.table(results);
-//               viewMenu()
-//               };
-//           }
-             
-//              else if (response.choice === "Add roles") {
-//                // query db for all roles
-//                db.query("INSERT INTO roles VALUES(?,?,)", [0, roles.title], function (err, results) {
-//                    console.table(results);
-//                 viewMenu()
-//                 });
-//               } 
-//              else if (response.choice === "Add employees") {
-//                // query db for all employees
-//                db.query("INSERT INTO employees VALUES(?, ?, ?)",[0, employees.first_name, employees.last_name], function (err, results) {
-//                    console.table(results);
-//                  viewMenu()
-//                  });
-//               };
-//             })}
-    
+      } else if (menuChoice === "Add Employee") {
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              name: "addFirst_name",
+              message: "Enter First Name",
+            },
+            {
+              type: "input",
+              name: "addLast_name",
+              message: "Enter Last Name",
+            },
+            {
+              type: "input",
+              name: "addRole_id",
+              message: "Enter Role ID",
+            },
+            {
+              type: "input",
+              name: "addManager_id",
+              message: "Enter Manager ID",
+            },
+          ])
+          .then((answers) => {
+            db.query(
+              "INSERT INTO employees (first_name, last_name, role_id, manager_id)VALUES(?,?,?,?)",
+              [
+                answers.addFirst_name,
+                answers.addLast_name,
+                answers.addRole_id,
+                answers.addManager_id,
+              ],
+              function (err, results) {
+                console.table(results);
+                viewMenu();
+              }
+            );
+          });
 
-// // {
-// //     type: "list",
-// //     name: "department name",
-// //     message: "What is the name of the department?",
-// //     choices: ["Engineering", "Finance", "Legal", "Sales"],
-// //   },
-// //   {
-// //     type: "list",
-// //     name: "role name",
-// //     message: "What is the name of the role?",
-// //     choices: [
-// //       "Lead Engineer",
-// //       "Software Engineer",
-// //       "Accountant",
-// //       "Account Manager",
-// //       "Legal Team Lead",
-// //       "Lawyer",
-// //       "Salesperson",
-// //     ],
-// //   },
-// //   {
-// //     type: "list",
-// //     name: "salary",
-// //     message: "What is the salary of the role?",
-// //     choices: [
-// //       "80000",
-// //       "120000",
-// //       "125000",
-// //       "150000",
-// //       "160000",
-// //       "190000",
-// //       "250000",
-// //     ],
-// //   },
-// //   {
-// //     type: "input",
-// //     name: "department role",
-// //     message: "Which department does the role belong to?",
-// //   },
-// //   {
-// //     type: "input",
-// //     name: "employee first name",
-// //     message: "What is employee first name?",
-// //   },
-// //   {
-// //     type: "input",
-// //     name: "employee last name",
-// //     message: "What is employee last name?",
-// //   },
-// //   {
-// //     type: "list",
-// //     name: "employee role",
-// //     message: "What is employee role?",
-// //     choices: [
-// //       "Salesperson",
-// //       "Lead Engineer",
-// //       "Software Engineer",
-// //       "Accountant",
-// //       "Account Manager",
-// //       "Legal Team Lead",
-// //       "Lawyer",
-// //     ],
-// //   },
-// //   {
-// //     type: "input",
-// //     name: "manager",
-// //     message: "Who is employee manager?",
-// //   },
-// //   {
-// //     type: "input",
-// //     name: "role update",
-// //     message: "Which employee role do you want to update?",
-// //   },
-// //   {
-// //     type: "input",
-// //     name: "choice",
-// //     message: "What would you like to do?",
-// //     choices: ["Add a department.", "Add a role.", "Add an employee."],
+      } else if (menuChoice === "Update Employee Role") {
+        // query db to view employees
+        db.query("SELECT * FROM employees", function (err, results) {
+          console.table(results);
+          inquirer
+            .prompt([
+              {
+                type: "list",
+                name: "employee",
+                message: "Choose new employee to update.",
+                choices: results.map((row) => {
+                  return {
+                    name: `${row.first_name} ${row.last_name}`,
+                    value: row.id,
+                  };
+                }),
+              },
+            ])
+            .then((answers) => {
+              console.log(answers);
+              const employeeId = answers.employee;
+              db.query('SELECT * FROM roles', function (err, results){
+                const roleRows = results;
+                inquirer.prompt([{
+                  type: "list",
+                  name: "role",
+                  message: "Choose new role for employee.",
+                  choices: roleRows.map((row) => {
+                    return {
+                      name: row.title,
+                      value: row.id,
+                    };
+                  }),
+               
+                }])
+                .then((answers) => {
+                 console.log(answers);
+                 db.query('UPDATE employees SET ? WHERE id = ?',[{role_id:answers.role},employeeId],function (err, res){
+                  console.log(res);
+                  viewMenu();
+                 })
+                });
+              })
+            });
+        });
+      }
+    });
 
-//     })}
-
-  
+}
